@@ -2,17 +2,16 @@
 #define Packet_h
 
 #include "Arduino.h"
-#include <vector.h>
+#define positionSize 2
+#define codeSize 6
+#define dataSize 24
+#define packetSize 32
 
 
 // Class for a transmission
 class Packet
 {
   public:
-    const int positionSize = 2;
-    const int codeSize = 6;
-    const int dataSize = 24;
-    const int packetSize = 32;
     void setPosition(int position);
     void setCode(int code);
     void setData(int data);
@@ -21,7 +20,7 @@ class Packet
     void getData(bool * data); 
     void getPacket(bool * packet);
     void encodePacket();
-    void sendPacket(int rate);
+    void sendPacket(float bitRate, int pin);
     
   private:
     bool _position[positionSize];
@@ -30,9 +29,8 @@ class Packet
     bool _encodedPacket[packetSize*2];
      
   
-}
+};
 
 #endif
 
 
-myArray = newArray

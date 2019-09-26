@@ -55,21 +55,22 @@ void Packet::getData(bool * data)
 }
 
 void Packet::getPacket(bool * packet){
+    int positionStart, codeStart, dataStart, packetEnd, i;
     positionStart = 0;
     codeStart = positionStart + positionSize;
     dataStart = codeStart + codeSize;
     packetEnd = dataStart + dataSize;
         
-    for(i = positionStart; i < codeStart; i++){
-        packet[i] = _position[i]
+    for(int i = positionStart; i < codeStart; i++){
+        packet[i] = _position[i];
     }
     
-    for(i = codeStart; i < dataStart; i++){
-         packet[i] = _code[i]
+    for(int i = codeStart; i < dataStart; i++){
+         packet[i] = _code[i];
     }
     
-    for(i = dataStart; i < packetEnd; i++){
-         packet[i] = _data[i]
+    for(int i = dataStart; i < packetEnd; i++){
+         packet[i] = _data[i];
     }
 }
 
@@ -83,8 +84,8 @@ void Packet::encodePacket()
     
     
     
-    for(i = positionStart; i < codeStart; i++){
-        if(_position[i]){
+    for(int i = positionStart; i < codeStart; i++){
+        if(_position[i] == 1){
             _encodedPacket[i] = 1;
             _encodedPacket[i+1] = 0;
         }
@@ -94,8 +95,8 @@ void Packet::encodePacket()
         }
     }
     
-    for(i = codeStart; i < dataStart; i++){
-        if(_code[i]){
+    for(int i = codeStart; i < dataStart; i++){
+        if(_code[i] == 1){
             _encodedPacket[i] = 1;
             _encodedPacket[i+1] = 0;
         }
@@ -105,8 +106,8 @@ void Packet::encodePacket()
         }
     }
     
-    for(i = dataStart; i < packetEnd; i++){
-        if(_data[i]){
+    for(int i = dataStart; i < packetEnd; i++){
+        if(_data[i] == 1){
             _encodedPacket[i] = 1;
             _encodedPacket[i+1] = 0;
         }
@@ -122,7 +123,7 @@ void Packet::sendPacket(float bitRate, int pin)
     float calcDelay = 1/bitRate;
     for(int i = 0; i < packetSize*2; i++)
     {
-        if(_encodedPacket[i]){
+        if(_encodedPacket[i] == 1){
             digitalWrite(pin, HIGH); // sets the digital pin 13 on
             delay(calcDelay);  
         }

@@ -2,19 +2,22 @@
 #define Transmission_h
 
 #include "Arduino.h"
-#inlcude "Packet.h"
+#include "Packet.h"
+
+#define maxTransmissionSize 8
 
 // Class for a transmission
 class Transmission
 {
   public:
-    const int maxTransmissionSize = 8;
     void addPacket(int code, int data);
     void sendPackets();
+    unsigned int calcCRC16(unsigned int crcValue, unsigned char newByte);
+    int calcTransmissionCRC();
   private:
     const int _transmissionAddress = 1212;
     int _currentNumPackets = 0;
-    Packet _transmission[maxTransmissionSize];
-    
-  
-}
+    int _maxTransmissionSize = maxTransmissionSize;
+    Packet _transmission[maxTransmissionSize]; 
+};
+#endif
