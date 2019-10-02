@@ -21,6 +21,8 @@ class Packet
     void getPacket(bool * packet);
     void encodePacket();
     void sendPacket(float bitRate, int pin);
+    void packetToByteArray(uint8_t * data);
+    uint8_t convertArrayToByte(bool * data);
     
   private:
     bool _position[positionSize];

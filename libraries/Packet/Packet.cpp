@@ -21,6 +21,43 @@ void Packet::setCode(int code)
   }
 }
 
+uint8_t Packet::convertArrayToByte(bool * data){
+    uint8_t returnValue = 0;
+    for(int i = 0; i < 8; i++){
+        returnValue = returnValue + (2^(i))*data[i];
+    }
+    return returnValue;
+}
+
+void Packet::packetToByteArray(uint8_t * data){
+    bool bit07[8], bit815[8], bit1623[8], bit2431[8];
+    
+    for(int i = 0; i < 8; i++){
+        if(i < 2){
+            bit07[i] = _position[i];
+        }
+        else {
+            bit07[i] = _code[i];
+        }
+    }
+    
+    for(int i = 0; i < 8; i++){
+        bit815[i] = _data[i];
+    }
+    
+    for(int i = 0; i < 8; i++){
+        bit1623[i] = _data[i+8];
+    }
+    
+    for(int i = 0; i < 8; i++){
+        bit2431[i] = _data[i+16];
+    }
+    
+    data[0] = convertArrayToByte(bit07);
+    data[1] = convertArrayToByte(bit815);
+    data[2] = convertArrayToByte(bit1623);
+    data[3] = convertArrayToByte(bit2431);    
+}
 
 void Packet::setData(int data)
 {
