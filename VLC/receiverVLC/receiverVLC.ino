@@ -10,26 +10,18 @@ bool data[32];
 int diodeVal = 0;
 int bitCounter = 0;
 Receiver receiver;
+Packet rxPacket;
 
-Serial.print("Begin loop \n");
+rxPacket.receivePacket(3, 13);
+rxPacket.decodePacket();
+rxPacket.rxGetPosition();
+rxPacket.rxGetCode();
+rxPacket.rxGetData();
+
+//Proceed to algo stuff, processing, printing
 }
 
-//determine when trx begins and ends to stop reading input and decode?
+//determine when trx begins and ends to stop reading input and begin to decode?
 void loop() {
-  diodeVal = analogRead(diodePin); //digital vs analogRead
 
-  if(diodeVal > 1000){
-    data[bitCounter]=1
-  }
-  else {
-    data[bitcounter]=0;
-  }
-
-  if(bitCounter == 32){
-    receiver.addPacket(data);
-    bitCounter = 0;
-  }
-  else {
-    bitCounter++;
-  }
 }

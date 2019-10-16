@@ -23,13 +23,20 @@ class Packet
     void sendPacket(float bitRate, int pin);
     void packetToByteArray(uint8_t * data);
     uint8_t convertArrayToByte(bool * data);
+
+	void receivePacket(float bitRate, int pin);
+	void decodePacket();
     
   private:
     bool _position[positionSize];
     bool _code[codeSize];
     bool _data[dataSize];
     bool _encodedPacket[packetSize*2];
-     
+
+	bool _rxPosition[positionSize];
+	bool _rxCode[codeSize];
+	bool _rxData[dataSize];
+	bool _rxEncodedPacket[packetSize * 2];
   
 };
 

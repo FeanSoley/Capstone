@@ -8,14 +8,13 @@
 
 class receiver {
 public:
-	void addPacket(int code, int data);
 	uint16_t getCRCValue();
 	int calcTransmissionCRC();
 	void getAddress(int address);
 	uint16_t gen_crc16(uint8_t* data_p, uint16_t length);
 	uint8_t convertArrayToByte(bool* data);
 
-	void receivePacket();
+	void receivePacket(int code, int data);
 	void decodePacket();
 	void displayData();
 
