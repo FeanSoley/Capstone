@@ -32,11 +32,37 @@ void Transmission::getCRC(){
     int currentByteInData;
     uint8_t totalDataInByteArray[40];    
     uint8_t addressPacketByteArray[4];
-    
+    uint8_t crcPacketByteArray[4];
     uint16_t totalSize = _currentNumPackets*4 + 6;
     
+    // Build address packet, always first so pos = 0, code value always 0, data = addresss
+    addressPacket.setPosition(0);
+	addressPacket.setCode(0);
+	addressPacket.setData(_transmissionAddress);
+    
+    // Get address byte array
     addressPacket.packetToByteArray(addressPacketByteArray);
-    Serial.print("1\n");
+
+    // add address packet to total byte array
+    for(int i = 0; i < 4; i++){
+        totalDataInByteArray[i] = addressPacketByteArray[i];
+    }
+    
+    // Build temp CRC packet 
+    crcPacket.setPosition(1); // position always in middle so = 1
+    crcPacket.setCode(1); // code for CRC = 1
+    crcPacket.setData(0); // data set to 0 temp
+    
+    // Get crc byte array
+    crcPacket.packetToByteArray(crcPacketByteArray);
+    
+    // add crc packet to total byte array
+    for(int i = 0; i < 2; i++){ // only to 2 because we dont want to include the 16 bits that will holds crc value
+        totalDataInByteArray[i+4] = crcPacketByteArray[i]; // + 4 to offset the address packet bytes
+    }
+    
+    
+    // Calc CRC on all the tranmission data packets
     for(int i = 0; i < _currentNumPackets; i++){
         currentByteInData = 6 + i*4;
         _transmission[i].packetToByteArray(currentByteArray);
@@ -44,11 +70,10 @@ void Transmission::getCRC(){
             totalDataInByteArray[currentByteInData+j] = currentByteArray[j];
         }
     }
-    Serial.print("2\n");
+
     crcValue = gen_crc16(totalDataInByteArray, totalSize);
-    Serial.print("3\n");
-    crcPacket.setPosition(1);
-    crcPacket.setCode(1);
+
+    // Change crc data value to new calced crc
     crcPacket.setData(crcValue);
     
 }  
@@ -89,10 +114,6 @@ uint16_t Transmission::gen_crc16(uint8_t * data_p, uint16_t length)
 
 void Transmission::sendPackets(float bitRate, int pin)
 {  
-    addressPacket.setPosition(0);
-	addressPacket.setCode(0);
-	addressPacket.setData(_transmissionAddress);
-	
     addressPacket.encodePacket();
     addressPacket.sendPacket(bitRate, pin);
     crcPacket.encodePacket();;
