@@ -11,7 +11,7 @@ void receiver::addPacket(bool *data) {  //disregard
 	_currentNumPackets++;
 }
 
-uint8_t[] receiver::convertArrayToByte(bool *data) {
+uint8_t[] receiver::convertArrayToByte(bool *data) { //disregard
 	uint8_t byte = 0;
 	uint8_t[] returnValue = new uint8_t[4]
 		for (int h = 0; h < 4; h++) {

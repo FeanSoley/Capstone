@@ -192,7 +192,7 @@ void Packet::sendPacket(float bitRate, int pin)
 
 void Packet::receivePacket(float bitRate, int pin) 
 {
-	float calcDelay = 1 / bitRate * 1000;
+	float calcDelay = 1 / bitRate * 1000000;
 	for (int i = 0; i < packetSize * 2; i++)
 	{
 		if (digitalRead(pin) == HIGH) 
@@ -210,7 +210,7 @@ void Packet::receivePacket(float bitRate, int pin)
 	}
 }
 
-void Packet::decodePacket()
+void Packet::decodePacket() //THis is just the reverse of what Sean wrote ie. _position==0 and not 1
 {
 	int positionStart, codeStart, dataStart, packetEnd, i, packetIter;
 	positionStart = 0;
@@ -220,7 +220,7 @@ void Packet::decodePacket()
 
 	for (int i = positionStart; i < codeStart; i++) {
 		packetIter = 2 * i;
-		if (_position[i] == 1) {
+		if (_position[i] == 0) {
 			_rxEncodedPacket[packetIter] = 1;
 			_rxEncodedPacket[packetIter + 1] = 0;
 		}
@@ -233,7 +233,7 @@ void Packet::decodePacket()
 
 	for (int i = 0; i < codeSize; i++) {
 		packetIter = 2 * i + codeStart * 2;
-		if (_code[i] == 1) {
+		if (_code[i] == 0) {
 			_rxEncodedPacket[packetIter] = 1;
 			_rxEncodedPacket[packetIter + 1] = 0;
 		}
@@ -246,7 +246,7 @@ void Packet::decodePacket()
 
 	for (int i = 0; i < dataSize; i++) {
 		packetIter = 2 * i + dataStart * 2;
-		if (_data[i] == 1) {
+		if (_data[i] == 0) {
 			_encodedPacket[packetIter] = 1;
 			_encodedPacket[packetIter + 1] = 0;
 		}
@@ -257,7 +257,7 @@ void Packet::decodePacket()
 		packetIter++;
 	}
 }
-
+ //Gets info from packet. These are not private because they're used in receiver.cpp
 void Packet::rxGetPosition()
 {
 	for (int i = 0; i < positionSize; i++) {
