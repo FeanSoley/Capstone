@@ -2,25 +2,40 @@
 #include "Packet.h"
 
 
-
+// This function sets the position bits to a given int
 void Packet::setPosition(int position)
 {
   int currentValue;
   for(int i = 0; i < positionSize; i++){
     currentValue = bitRead(position,i);
+    // Odd indexing is due to bitRead iterating backwards
     _position[positionSize-i-1] = currentValue;
   }
 }
 
+// This function sets teh code bits to a given int
 void Packet::setCode(int code)
 {
   int currentValue;
   for(int i = 0; i < codeSize; i++){
     currentValue = bitRead(code,i);
+    // Odd indexing is due to bitRead iterating backwards
     _code[codeSize-i-1] = currentValue;
   }
 }
 
+// This function sets the data bits to a given int
+void Packet::setData(int data)
+{
+  int currentValue;
+  for(int i = 0; i < dataSize; i++){
+    currentValue = bitRead(data,i);
+    // Odd indexing is due to bitRead iterating backwards
+    _data[dataSize-i-1] = currentValue;
+  }
+}
+
+// This function converts a 8 bit array to a unint8_t
 uint8_t Packet::convertArrayToByte(bool * data){
     uint8_t returnValue = 0;
     for(int i = 0; i < 8; i++){
@@ -29,6 +44,7 @@ uint8_t Packet::convertArrayToByte(bool * data){
     return returnValue;
 }
 
+// This function converts the entire packet into an array of 4 unint8_t's 
 void Packet::packetToByteArray(uint8_t * data){
     bool bit07[8], bit815[8], bit1623[8], bit2431[8];
     
@@ -59,16 +75,7 @@ void Packet::packetToByteArray(uint8_t * data){
     data[3] = convertArrayToByte(bit2431);    
 }
 
-void Packet::setData(int data)
-{
-  int currentValue;
-  for(int i = 0; i < dataSize; i++){
-    currentValue = bitRead(data,i);
-    _data[dataSize-i-1] = currentValue;
-  }
-}
-
-
+// Returns a copy of the position bit array
 void Packet::getPosition(bool * position)
 {
     for(int i = 0; i < positionSize; i++){
@@ -167,18 +174,18 @@ void Packet::encodePacket()
 
 void Packet::sendPacket(float bitRate, int pin)
 {
-    float calcDelay = 1/bitRate*1000;
+    float calcDelay = (1/bitRate)*1000000;
     for(int i = 0; i < packetSize*2; i++)
     {
         if(_encodedPacket[i] == 1){
             Serial.print("High\n");
             digitalWrite(pin, HIGH); // sets the digital pin 13 on
-            delay(calcDelay);  
+            delayMicroseconds(calcDelay);  
         }
         else{
             Serial.print("Low\n");
             digitalWrite(pin, LOW); // sets the digital pin 13 on
-            delay(calcDelay);  
+            delayMicroseconds(calcDelay);  
         }
     }
 }
