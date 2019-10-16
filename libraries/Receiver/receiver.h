@@ -19,7 +19,7 @@ public:
 	void displayData();
 
 private:
-	Packet addressPacket;
+	Packet rxPacket;
 	Packet crcPacket;
 	uint16_t crcValue;
 	int _transmissionAddress = 1212;

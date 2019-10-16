@@ -3,7 +3,7 @@
 #include "receiver.h"
 #include "stdint.h"
 
-void receiver::addPacket(bool *data) {
+void receiver::addPacket(bool *data) {  //disregard
 	uint8_t[] packet = convertToByteArray(data);
 
 	_transmission[_currentNumPackets] = packet;
@@ -24,16 +24,24 @@ uint8_t[] receiver::convertArrayToByte(bool *data) {
 	return returnValue;
 }
 
-void receiver::decodePacket(){
-
-
-}
-
 void receiver::getCRC() {
-
+	//reverse CRC?
 }
 
 void packet::displayData(){
+	//display either raw data or algo output based on code
+	Serial.print("Position \n"); 
+	for (int i = 0; i < rxPacket.positionSize; i++) {
+		Serial.print(rxPacket._rxPosition[i]);
+	}
 
+	Serial.print("\n Code \n");
+	for (int i = 0; i < rxPacket.codeSize; i++) {
+		Serial.print(rxPacket._rxCode[i]);
+	}
 
+	Serial.print("\n Data \n");
+	for (int i = 0; i < rxPacket.dataSize; i++) {
+		Serial.print(rxPacket._rxData[i]);
+	}
 }

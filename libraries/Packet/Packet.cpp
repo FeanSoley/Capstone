@@ -203,7 +203,8 @@ void Packet::receivePacket(float bitRate, int pin)
 	}
 }
 
-void Packet::decodePacket() {
+void Packet::decodePacket()
+{
 	int positionStart, codeStart, dataStart, packetEnd, i, packetIter;
 	positionStart = 0;
 	codeStart = positionStart + positionSize;
@@ -248,29 +249,29 @@ void Packet::decodePacket() {
 		}
 		packetIter++;
 	}
+}
 
-
-	void Packet::rxGetPosition()
-	{
-		for (int i = 0; i < positionSize; i++) {
-			rxPosition[i] = _rxEncodedPacket[i];
-		}
+void Packet::rxGetPosition()
+{
+	for (int i = 0; i < positionSize; i++) {
+		_rxPosition[i] = _rxEncodedPacket[i];
 	}
+}
 
 
-	void Packet::rxGetCode()
-	{
-		for (int i = 0 - 1; i < codeSize; i++) {
-			rxCode[i] = _rxEncodedPacket[i + positionSize];
-		}
+void Packet::rxGetCode()
+{
+	for (int i = 0 - 1; i < codeSize; i++) {
+		_rxCode[i] = _rxEncodedPacket[i + positionSize];
 	}
+}
 
-	void Packet::rxGetData(bool* data)
-	{
-		for (int i = 0; i < dataSize; i++) {
-			rxData[i] = _rxEncodedPacket[i + positionSize + codeSize];
-		}
+void Packet::rxGetData(bool* data)
+{
+	for (int i = 0; i < dataSize; i++) {
+		_rxData[i] = _rxEncodedPacket[i + positionSize + codeSize];
 	}
+}
 
 
 
