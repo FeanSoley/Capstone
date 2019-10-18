@@ -27,10 +27,10 @@ class Packet
 	void receivePacket(float bitRate, int pin);
 	void decodePacket();
 
-	bool _rxPosition[positionSize];
+	/*bool _rxPosition[positionSize];
 	bool _rxCode[codeSize];
 	bool _rxData[dataSize];
-	bool _rxEncodedPacket[packetSize * 2];
+	bool _rxEncodedPacket[packetSize * 2];*/
     
   private:
     bool _position[positionSize];

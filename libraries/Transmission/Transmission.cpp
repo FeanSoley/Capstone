@@ -131,3 +131,94 @@ void Transmission::sendPackets(float bitRate, int pin)
     }
 }
 
+/*
+bool Transmission::checkForMessage(float bitRate, int pin){
+    // Declare variables
+    int pinReading, currentTime;
+    float calcDelay = ((1/bitRate)*1000000)/2;
+    
+    // Get pin reading
+    pinReading = digitalRead(pin);
+    
+    if(pinReading == LOW){
+        startTime = micros();
+        currentTime = startTime;
+        // We are going to constantly check for half of the duration of a cycle that the value stays low
+        while(currentTime < startTime + calcDelay){
+            pinReading = digitalRead(pin);
+            if(pinReading == HIGH){
+                return 0;
+            }
+        }
+        return 1;
+    }
+    return 0;
+    
+}
+
+bool Transmission::receiveTransmission(float bitRate, int pin){
+    float calcDelay = (1/bitRate)*1000000;
+    int pinReading, currentBit = 0, currentTime, startTime;
+    totalReceivedBits = 0;
+    
+    
+    while(1==1){
+        // Get pin reading
+        pinReading = digitalRead(pin);
+        startTime = micros();
+        
+        if(pinReading == LOW){
+            tranmissionBuffer[currentBit] = 0;
+        }
+        else{
+            tranmissionBuffer[currentBit] = 1;
+        }
+        currentBit++;
+        totalReceivedBits = currentBit + 1;
+        
+        
+        if(currentBit >= 2){
+            // If transmission sitting high it is done
+            if(tranmissionBuffer[currentBit] == tranmissionBuffer[currentBit-1] == tranmissionBuffer[currentBit-2] == 1){
+                // Ignore sitting values
+                totalReceivedBits = totalReceivedBits - 2;
+                // If total bits modulo 64 (1 packet encoded) is not 0, not enough bits/too many bits
+                if(totalReceivedBits % 64 != 0){
+                    // Failed
+                    return 0;
+                }
+                else {
+                    // Received Message
+                    return 1;
+                }
+            }
+            // If sitting low, it broke line of sight
+            if(tranmissionBuffer[currentBit] == tranmissionBuffer[currentBit-1] == tranmissionBuffer[currentBit-2] == 1){
+                return 0;
+            }
+
+        }   
+        currentTime = micros();
+        delayMicroseconds(startTime+calcDelay-currentTime);  
+    }
+
+
+
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

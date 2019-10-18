@@ -189,7 +189,7 @@ void Packet::sendPacket(float bitRate, int pin)
         }
     }
 }
-
+/*
 void Packet::receivePacket(float bitRate, int pin) 
 {
 	float calcDelay = 1 / bitRate * 1000000;
@@ -257,6 +257,7 @@ void Packet::decodePacket() //THis is just the reverse of what Sean wrote ie. _p
 		packetIter++;
 	}
 }
+
  //Gets info from packet. These are not private because they're used in receiver.cpp
 void Packet::rxGetPosition()
 {
@@ -280,7 +281,7 @@ void Packet::rxGetData(bool* data)
 	}
 }
 
-
+*/
 
 
 

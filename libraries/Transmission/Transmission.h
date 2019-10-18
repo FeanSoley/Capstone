@@ -18,6 +18,8 @@ class Transmission
     void setAddress(int address);
     uint16_t gen_crc16(uint8_t * data_p, uint16_t length);
     uint8_t convertArrayToByte(bool * data);
+    bool checkForMessage(float bitRate, int pin);
+    bool receiveTransmission(float bitRate, int pin);
   private:
     Packet addressPacket;
     Packet crcPacket;
@@ -26,5 +28,7 @@ class Transmission
     int _currentNumPackets = 0;
     int _maxTransmissionSize = maxTransmissionSize;
     Packet _transmission[maxTransmissionSize]; 
+    bool receiveBuffer[2*32*(maxTransmissionSize+2)];
+    int totalReceivedBits;
 };
 #endif
