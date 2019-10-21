@@ -7,6 +7,12 @@
 #define dataSize 24
 #define packetSize 32
 
+// Define Codes
+#define SPEED_CODE 2
+#define CRC_CODE 1
+#define ADDR_CODE 0
+
+
 
 // Class for a transmission
 class Packet
@@ -19,10 +25,16 @@ class Packet
     void getCode(bool * code); 
     void getData(bool * data); 
     void getPacket(bool * packet);
+    int getIntPosition();
+    int getIntCode();
+    int getIntData();
     void encodePacket();
     void sendPacket(float bitRate, int pin);
     void packetToByteArray(uint8_t * data);
+    void printPacket();
+    int bitArrayToInt(bool * array, int length);
     uint8_t convertArrayToByte(bool * data);
+    void cleanPacket();
 
 	void receivePacket(float bitRate, int pin);
 	void decodePacket();

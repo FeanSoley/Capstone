@@ -11,6 +11,14 @@ void Transmission::addPacket(int code, int data)
     _currentNumPackets++;
 }
 
+void Transmission::addReceivedPacket(int pos, int code, int data)
+{
+    _transmission[_currentNumPackets].setCode(pos);
+    _transmission[_currentNumPackets].setCode(code);
+    _transmission[_currentNumPackets].setData(data);
+    _currentNumPackets++;
+}
+
 uint16_t Transmission::getCRCValue(){
     return crcValue;
 }
@@ -131,16 +139,16 @@ void Transmission::sendPackets(float bitRate, int pin)
     }
 }
 
-/*
+
 bool Transmission::checkForMessage(float bitRate, int pin){
     // Declare variables
-    int pinReading, currentTime;
+    int pinReading, currentTime, startTime;
     float calcDelay = ((1/bitRate)*1000000)/2;
     
     // Get pin reading
     pinReading = digitalRead(pin);
     
-    if(pinReading == LOW){
+    if(pinReading == 0){
         startTime = micros();
         currentTime = startTime;
         // We are going to constantly check for half of the duration of a cycle that the value stays low
@@ -158,54 +166,349 @@ bool Transmission::checkForMessage(float bitRate, int pin){
 
 bool Transmission::receiveTransmission(float bitRate, int pin){
     float calcDelay = (1/bitRate)*1000000;
-    int pinReading, currentBit = 0, currentTime, startTime;
+    int currentState =0, currentBit = 0, newTime, currentTime, remainder, timer, printVal, timeSinceLastChange;
+    currentTime = micros();
+    while(1==1){
+        //timer = micros();
+        newTime = micros();
+        timeSinceLastChange = newTime - currentTime;
+        if(digitalRead(pin) != currentState){
+            // Only 1 bit
+            if(timeSinceLastChange <= 1.5*calcDelay && timeSinceLastChange > .5*calcDelay){
+                receiveBuffer[currentBit] = currentState;
+                currentBit++;
+            }
+            // no bits, mistake don't change state
+            else if(timeSinceLastChange <= .5*calcDelay){
+                continue;
+            }       
+            // 2 Bits
+            else if(timeSinceLastChange > 1.5*calcDelay && timeSinceLastChange <= calcDelay*2.5 ){
+                receiveBuffer[currentBit] = currentState;
+                currentBit++;
+                receiveBuffer[currentBit] = currentState;
+                currentBit++;
+            }
+            // 3 bits too long
+            else if(timeSinceLastChange > calcDelay*2.5){
+                // Probably done
+                receiveBuffer[currentBit] = currentState;
+                currentBit++;
+                receiveBuffer[currentBit] = currentState;
+                currentBit++;
+                receiveBuffer[currentBit] = currentState;
+                currentBit++;
+                
+                if(currentState == 1){
+                    remainder = currentBit % 64;
+                    if(remainder == 3){
+                        totalReceivedBits = currentBit - 3;
+                        return false;
+                    }
+                    else if(remainder == 2){
+                        totalReceivedBits = currentBit - 2;
+                        return false;
+                    } 
+                    else{
+                        return true;
+                    }
+                }
+                // Something went wrong
+                else{
+                    return true;
+                }
+            }
+            currentState = digitalRead(pin);
+            currentTime = newTime;
+        }
+        else if(timeSinceLastChange > calcDelay*2.5){
+            // Probably done
+            receiveBuffer[currentBit] = currentState;
+            currentBit++;
+            receiveBuffer[currentBit] = currentState;
+            currentBit++;
+            receiveBuffer[currentBit] = currentState;
+            currentBit++;
+            
+            if(currentState == 1){
+                remainder = currentBit % 64;
+                if(remainder == 3){
+                    totalReceivedBits = currentBit - 3;
+                    return false;
+                }
+                else if(remainder == 2){
+                    totalReceivedBits = currentBit - 2;
+                    return false;
+                } 
+                else{
+                    return true;
+                }
+            }
+            // Something went wrong
+            else{
+                return true;
+            }
+        }
+        //printVal = micros()-timer;
+        //Serial.print(printVal);
+        //Serial.println();
+    }
+}
+    
+    
+    
+/*
+bool Transmission::receiveTransmission(float bitRate, int pin){
+    float calcDelay = (1/bitRate)*1000000;
+    int pinReading, currentBit = 0, currentTime, startTime, remainder;
     totalReceivedBits = 0;
     
     
     while(1==1){
         // Get pin reading
-        pinReading = digitalRead(pin);
         startTime = micros();
+        pinReading = digitalRead(pin);
+        receiveBuffer[currentBit] = pinReading;
+        //Serial.print(pinReading);
+       // Serial.println();
+        totalReceivedBits++;
         
-        if(pinReading == LOW){
-            tranmissionBuffer[currentBit] = 0;
-        }
-        else{
-            tranmissionBuffer[currentBit] = 1;
-        }
-        currentBit++;
-        totalReceivedBits = currentBit + 1;
-        
-        
+       
         if(currentBit >= 2){
             // If transmission sitting high it is done
-            if(tranmissionBuffer[currentBit] == tranmissionBuffer[currentBit-1] == tranmissionBuffer[currentBit-2] == 1){
-                // Ignore sitting values
-                totalReceivedBits = totalReceivedBits - 2;
-                // If total bits modulo 64 (1 packet encoded) is not 0, not enough bits/too many bits
-                if(totalReceivedBits % 64 != 0){
-                    // Failed
-                    return 0;
+            if(receiveBuffer[currentBit] == true && receiveBuffer[currentBit-1] == true && receiveBuffer[currentBit-2] == true){
+                remainder = totalReceivedBits % 64;
+                if(remainder == 3){
+                    totalReceivedBits -= 3;
+                    return false;
                 }
-                else {
-                    // Received Message
-                    return 1;
+                else if(remainder == 2){
+                    totalReceivedBits -= 2;
+                    return false;
+                }
+                else{
+                    return true;
                 }
             }
             // If sitting low, it broke line of sight
-            if(tranmissionBuffer[currentBit] == tranmissionBuffer[currentBit-1] == tranmissionBuffer[currentBit-2] == 1){
-                return 0;
+            if(receiveBuffer[currentBit] == false && receiveBuffer[currentBit-1] == false && receiveBuffer[currentBit-2] == false){
+                return true;
             }
 
         }   
+        currentBit++;
+
         currentTime = micros();
-        delayMicroseconds(startTime+calcDelay-currentTime);  
+        Serial.print(startTime+calcDelay-currentTime);
+        Serial.println();
+
+        currentTime = micros(); 
+    
+        delayMicroseconds(startTime+calcDelay-currentTime); 
+        
     }
+}
+ */
+ 
+ 
+void Transmission::decodeTransmission(){
+    int decodedIter;
+    
+    for(int i = 0; i < totalReceivedBits; i+=2){
+        decodedIter = i/2;
+        if(receiveBuffer[i] == 1 && receiveBuffer[i+1] == 0){
+            decodedTransmission[decodedIter] = 1;
+        }
+        else{
+            decodedTransmission[decodedIter] = 0;
+        }
+    }
+    totalDecodedBits = totalReceivedBits/2;  
+        
+}
 
+void Transmission::printDecoded(){
+    Serial.print("decoded Message\n");
+    
+    for(int i = 0; i <  totalDecodedBits; i++){
+       Serial.print(decodedTransmission[i]); 
+       Serial.println(); 
+    }
+}
 
-
+int Transmission::bitArrayToInt(bool * array, int length)
+{
+    int ret = 0;
+    int tmp;
+    for (int i = 0; i < length; i++) {
+        tmp = array[i];
+        ret |= tmp << (length - i - 1);
+    }
+    return ret;
+}
+/*
+int Transmission::bitArrayToInt(bool * array, int length){
+    int returnValue = 0, itr = 0;
+    for(int i = length-1; i >= 0; i--){
+        returnValue = returnValue + (2^(itr))*array[i];
+        itr++;
+    }
+    return returnValue;
+    
+    
 }
 */
+
+void Transmission::deconstructTransmission(){
+    // Start with first packet
+    bool posBits[positionSize], codeBits[codeSize], dataBits[dataSize];
+    int posInt, codeInt, dataInt, packetOffset = 0, codeOffset = positionSize, dataOffset = positionSize + codeSize;
+    int posIter, codeIter, dataIter;
+    _currentNumPackets = 0;
+    
+    // Address Packet
+    for(int i = 0; i < positionSize; i++){
+        posIter = i +  packetOffset;
+        posBits[i] =  decodedTransmission[posIter];
+    }
+    
+    for(int i = 0; i < codeSize; i++){
+        codeIter = i + codeOffset + packetOffset;
+        codeBits[i] =  decodedTransmission[codeIter];
+    }
+    
+    for(int i = 0; i < dataSize; i++){
+        dataIter = i + dataOffset + packetOffset;
+        dataBits[i] =  decodedTransmission[dataIter];
+    }
+    
+
+    posInt = bitArrayToInt(posBits, positionSize);
+    codeInt = bitArrayToInt(codeBits, codeSize);
+    dataInt = bitArrayToInt(dataBits, dataSize);
+    
+    
+    addressPacket.setPosition(posInt);
+    addressPacket.setCode(codeInt);
+    addressPacket.setData(dataInt);
+    
+    packetOffset = packetOffset + packetSize;
+    
+    
+    for(int i = 0; i < positionSize; i++){
+        posIter = i +  packetOffset;
+        posBits[i] =  decodedTransmission[posIter];
+    }
+    
+    for(int i = 0; i < codeSize; i++){
+        codeIter = i + codeOffset + packetOffset;
+        codeBits[i] =  decodedTransmission[codeIter];
+    }
+    
+    for(int i = 0; i < dataSize; i++){
+        dataIter = i + dataOffset + packetOffset;
+        dataBits[i] =  decodedTransmission[dataIter];
+    }
+    
+    posInt = bitArrayToInt(posBits, positionSize);
+    codeInt = bitArrayToInt(codeBits, codeSize);
+    dataInt = bitArrayToInt(dataBits, dataSize);
+    
+    crcPacket.setPosition(posInt);
+    crcPacket.setCode(codeInt);
+    crcPacket.setData(dataInt);
+    
+    packetOffset = packetOffset + packetSize;
+    
+    for(int j = 0; j < totalDecodedBits-packetOffset; j++){
+        for(int i = 0; i < positionSize; i++){
+            posIter = i +  packetOffset;
+            posBits[i] =  decodedTransmission[posIter];
+        }
+        
+        for(int i = 0; i < codeSize; i++){
+            codeIter = i + codeOffset + packetOffset;
+            codeBits[i] =  decodedTransmission[codeIter];
+        }
+        
+        for(int i = 0; i < dataSize; i++){
+            dataIter = i + dataOffset + packetOffset;
+            dataBits[i] =  decodedTransmission[dataIter];
+        }
+        
+        posInt = bitArrayToInt(posBits, positionSize);
+        codeInt = bitArrayToInt(codeBits, codeSize);
+        dataInt = bitArrayToInt(dataBits, dataSize);
+        
+        addReceivedPacket(posInt, codeInt, dataInt);
+        
+        packetOffset = packetOffset + packetSize;          
+    }
+}
+    
+    
+void Transmission::printTransmission(){
+    addressPacket.printPacket();
+    crcPacket.printPacket();
+    for(int i = 0; i < _currentNumPackets; i++){
+        _transmission[i].printPacket();
+    }
+}
+    
+    
+void Transmission::cleanTransmission(){
+    addressPacket.cleanPacket();
+    crcPacket.cleanPacket();
+    
+    for(int i = 0; i < maxTransmissionSize; i++){
+        _transmission[i].cleanPacket();
+    }
+    for(int i = 0; i < 2*32*(maxTransmissionSize+2); i++){
+        receiveBuffer[i] = NULL;
+    }
+    for(int i = 0; i < 32*(maxTransmissionSize+2); i++){
+        decodedTransmission[i] = 0;
+    }
+    
+    totalReceivedBits = 0;
+    totalDecodedBits = 0;
+}    
+    
+void Transmission::printEncoded(){
+    for(int i = 0; i < totalReceivedBits; i++){
+        Serial.print(receiveBuffer[i]);
+        Serial.println();
+    }
+}    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

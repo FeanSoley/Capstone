@@ -172,23 +172,114 @@ void Packet::encodePacket()
     }
 }
 
+int Packet::getIntPosition(){
+    int posInt;
+    posInt = bitArrayToInt(_position, positionSize);
+    return posInt;
+}
+
+
+int Packet::getIntCode(){
+    int codeInt;
+    codeInt = bitArrayToInt(_code, codeSize);
+    return codeInt;
+}
+
+
+int Packet::getIntData(){
+    int dataInt;
+    dataInt = bitArrayToInt(_data, dataSize);
+    return dataInt;
+}
+
+void Packet::cleanPacket(){
+    setPosition(0);
+    setCode(0);
+    setData(0);
+}
+
+int Packet::bitArrayToInt(bool * array, int length)
+{
+    int ret = 0;
+    int tmp;
+    for (int i = 0; i < length; i++) {
+        tmp = array[i];
+        ret |= tmp << (length - i - 1);
+    }
+    return ret;
+}
+
+
 void Packet::sendPacket(float bitRate, int pin)
 {
     float calcDelay = (1/bitRate)*1000000;
+    int currentTime, startTime;
     for(int i = 0; i < packetSize*2; i++)
     {
+        startTime = micros();
         if(_encodedPacket[i] == 1){
-            Serial.print("High\n");
-            digitalWrite(pin, HIGH); // sets the digital pin 13 on
-            delayMicroseconds(calcDelay);  
+            //Serial.print("1\n");
+            digitalWrite(pin, HIGH); // sets the digital pin 13 on  
         }
         else{
-            Serial.print("Low\n");
-            digitalWrite(pin, LOW); // sets the digital pin 13 on
-            delayMicroseconds(calcDelay);  
+            //Serial.print("0\n");
+            digitalWrite(pin, LOW); // sets the digital pin 13 on 
         }
+        //currentTime = micros();
+        //Serial.print(startTime+calcDelay-currentTime);
+        //Serial.println();
+        delayMicroseconds(calcDelay);  
     }
 }
+
+void Packet::printPacket(){
+    int data, code;
+    
+    code = getIntCode();
+    data = getIntData();
+    
+    switch(code) {
+        case ADDR_CODE:
+            Serial.print("Address: "); 
+            delay(10);
+            Serial.print(data); 
+            delay(10);
+            Serial.print("\n"); 
+            delay(10);
+            break;
+        case CRC_CODE:
+            Serial.print("CRC: "); 
+            delay(10);
+            Serial.print(data); 
+            delay(10);
+            Serial.print("\n"); 
+            delay(10);
+            break;
+        case SPEED_CODE:
+            Serial.print("Speed: "); 
+            delay(10);
+            Serial.print(data); 
+            delay(10);
+            Serial.print("\n"); 
+            delay(10);
+            break;           
+        default:
+            Serial.print("Unknown Code: "); 
+            delay(10);
+            Serial.print(data); 
+            delay(10);
+            Serial.print("\n"); 
+            delay(10);
+            break;    
+        
+    }
+    
+}
+
+
+
+
+
 /*
 void Packet::receivePacket(float bitRate, int pin) 
 {
