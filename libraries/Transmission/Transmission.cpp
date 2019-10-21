@@ -169,7 +169,6 @@ bool Transmission::receiveTransmission(float bitRate, int pin){
     int currentState =0, currentBit = 0, newTime, currentTime, remainder, timer, printVal, timeSinceLastChange;
     currentTime = micros();
     while(1==1){
-        //timer = micros();
         newTime = micros();
         timeSinceLastChange = newTime - currentTime;
         if(digitalRead(pin) != currentState){
@@ -249,9 +248,6 @@ bool Transmission::receiveTransmission(float bitRate, int pin){
                 return true;
             }
         }
-        //printVal = micros()-timer;
-        //Serial.print(printVal);
-        //Serial.println();
     }
 }
     
@@ -346,18 +342,7 @@ int Transmission::bitArrayToInt(bool * array, int length)
     }
     return ret;
 }
-/*
-int Transmission::bitArrayToInt(bool * array, int length){
-    int returnValue = 0, itr = 0;
-    for(int i = length-1; i >= 0; i--){
-        returnValue = returnValue + (2^(itr))*array[i];
-        itr++;
-    }
-    return returnValue;
-    
-    
-}
-*/
+
 
 void Transmission::deconstructTransmission(){
     // Start with first packet
