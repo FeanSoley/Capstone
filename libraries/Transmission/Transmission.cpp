@@ -173,12 +173,12 @@ bool Transmission::receiveTransmission(float bitRate, int pin){
         timeSinceLastChange = newTime - currentTime;
         if(digitalRead(pin) != currentState){
             // Only 1 bit
-            if(timeSinceLastChange <= 1.5*calcDelay && timeSinceLastChange > .5*calcDelay){
+            if(timeSinceLastChange <= 1.5*calcDelay && timeSinceLastChange > .9*calcDelay){
                 receiveBuffer[currentBit] = currentState;
                 currentBit++;
             }
             // no bits, mistake don't change state
-            else if(timeSinceLastChange <= .5*calcDelay){
+            else if(timeSinceLastChange <= .9*calcDelay){
                 continue;
             }       
             // 2 Bits
@@ -209,11 +209,13 @@ bool Transmission::receiveTransmission(float bitRate, int pin){
                         return false;
                     } 
                     else{
+                        totalReceivedBits = currentBit;
                         return true;
                     }
                 }
                 // Something went wrong
                 else{
+                    totalReceivedBits = currentBit;
                     return true;
                 }
             }
@@ -240,16 +242,19 @@ bool Transmission::receiveTransmission(float bitRate, int pin){
                     return false;
                 } 
                 else{
+                    totalReceivedBits = currentBit;
                     return true;
                 }
             }
             // Something went wrong
             else{
+                totalReceivedBits = currentBit;
                 return true;
             }
         }
     }
 }
+    
     
     
     
@@ -466,9 +471,9 @@ void Transmission::printEncoded(){
     }
 }    
     
-    
-    
-    
+int Transmission::getTotalReceivedBits(){
+    return totalReceivedBits;    
+}
     
     
     

@@ -230,6 +230,7 @@ void Packet::sendPacket(float bitRate, int pin)
         //Serial.println();
         delayMicroseconds(calcDelay);  
     }
+    digitalWrite(pin, HIGH);
 }
 
 void Packet::printPacket(){

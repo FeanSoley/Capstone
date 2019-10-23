@@ -28,6 +28,7 @@ class Transmission
     void printDecoded();
     void cleanTransmission();
     void printEncoded();
+    int getTotalReceivedBits();
     
   private:
     Packet addressPacket;
