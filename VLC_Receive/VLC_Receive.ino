@@ -1,8 +1,8 @@
 #include <Packet.h>
 #include <Transmission.h>
 
-#define BIT_RATE 2400.0
-#define PORT_NUM 10
+#define BIT_RATE 6200.0
+#define PORT_NUM 6
 
 void setup() {
   // put your setup code here, to run once:
@@ -22,12 +22,14 @@ void setup() {
       bitCount = transmission.getTotalReceivedBits();
       if(failed==0){
         Serial.print("passed\n");
+        Serial.println();
         //transmission.printEncoded();
         transmission.decodeTransmission();
         //transmission.printDecoded();
         transmission.deconstructTransmission();
         transmission.printTransmission();
         transmission.cleanTransmission();
+        delay(5);
       }
       else if(failed == 1 && bitCount < 10){
         //transmission.printEncoded();

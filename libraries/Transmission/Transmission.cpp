@@ -173,7 +173,7 @@ bool Transmission::receiveTransmission(float bitRate, int pin){
         timeSinceLastChange = newTime - currentTime;
         if(digitalRead(pin) != currentState){
             // Only 1 bit
-            if(timeSinceLastChange <= 1.5*calcDelay && timeSinceLastChange > .9*calcDelay){
+            if(timeSinceLastChange <= 1.95*calcDelay && timeSinceLastChange > .9*calcDelay){
                 receiveBuffer[currentBit] = currentState;
                 currentBit++;
             }
@@ -182,14 +182,14 @@ bool Transmission::receiveTransmission(float bitRate, int pin){
                 continue;
             }       
             // 2 Bits
-            else if(timeSinceLastChange > 1.5*calcDelay && timeSinceLastChange <= calcDelay*2.5 ){
+            else if(timeSinceLastChange > 1.95*calcDelay && timeSinceLastChange <= calcDelay*2.8 ){
                 receiveBuffer[currentBit] = currentState;
                 currentBit++;
                 receiveBuffer[currentBit] = currentState;
                 currentBit++;
             }
             // 3 bits too long
-            else if(timeSinceLastChange > calcDelay*2.5){
+            else if(timeSinceLastChange > calcDelay*2.8){
                 // Probably done
                 receiveBuffer[currentBit] = currentState;
                 currentBit++;
