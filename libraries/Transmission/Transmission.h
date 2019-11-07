@@ -29,6 +29,7 @@ class Transmission
     void cleanTransmission();
     void printEncoded();
     int getTotalReceivedBits();
+    bool checkCRC();
     
   private:
     Packet addressPacket;

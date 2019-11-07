@@ -1,14 +1,15 @@
 #include <Packet.h>
 #include <Transmission.h>
 
-#define BIT_RATE 6200.0
-#define PORT_NUM 6
+#define BIT_RATE 4800.0
+#define PORT_NUM 5
 
 void setup() {
   // put your setup code here, to run once:
   pinMode(PORT_NUM, INPUT);
   bool isMessage;
   bool failed;
+  bool crcCheck;
   int pinreading, bitCount;
   Transmission transmission;
   Serial.begin(9600);
@@ -22,46 +23,39 @@ void setup() {
       bitCount = transmission.getTotalReceivedBits();
       if(failed==0){
         Serial.print("passed\n");
-        Serial.println();
         //transmission.printEncoded();
         transmission.decodeTransmission();
         //transmission.printDecoded();
         transmission.deconstructTransmission();
-        transmission.printTransmission();
+        crcCheck = transmission.checkCRC();
+        if(crcCheck){
+          transmission.printTransmission();
+        } 
+        else {
+          Serial.print("CRC Error");
+        }
         transmission.cleanTransmission();
+        crcCheck = transmission.checkCRC();
+        
+        Serial.println();
         delay(5);
       }
-      else if(failed == 1 && bitCount < 10){
+      else if(failed == 1 && bitCount < 150){
         //transmission.printEncoded();
         transmission.cleanTransmission();
         
       }
       else{
-        Serial.print("Failed\n");
+        //Serial.print("Failed\n");
+        //Serial.print(bitCount);
+        //Serial.println();
         //transmission.printEncoded();
         transmission.cleanTransmission();   
       }
     }  
   }
 }
-/*
-    bool isMessage;
-    // put your main code here, to run repeatedly:
-    Transmission transmission;
-    //Serial.print("Start");
-    delay(100);
-    while(1==1){
-      isMessage = transmission.checkForMessage(BIT_RATE, PORT_NUM);
-      Serial.print(isMessage);
-      if(isMessage == 1){
-        Serial.print("here");
-        transmission.receiveTransmission(BIT_RATE, PORT_NUM);
-        transmission.decodeTransmission();
-        transmission.deconstructTransmission();
-        transmission.printTransmission();
-      }
-   }
-   */
+
 
 
 void loop() {

@@ -37,11 +37,15 @@ void Packet::setData(int data)
 
 // This function converts a 8 bit array to a unint8_t
 uint8_t Packet::convertArrayToByte(bool * data){
-    uint8_t returnValue = 0;
-    for(int i = 0; i < 8; i++){
-        returnValue = returnValue + (2^(i))*data[i];
+    uint8_t ret = 0;
+    int length = 8;
+    int tmp;
+    for (int i = 0; i < length; i++) {
+        tmp = data[i];
+        ret |= tmp << (length - i - 1);
     }
-    return returnValue;
+    //Serial.print(ret);
+    return ret;
 }
 
 // This function converts the entire packet into an array of 4 unint8_t's 
@@ -53,7 +57,7 @@ void Packet::packetToByteArray(uint8_t * data){
             bit07[i] = _position[i];
         }
         else {
-            bit07[i] = _code[i];
+            bit07[i] = _code[i-2];
         }
     }
     

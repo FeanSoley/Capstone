@@ -13,7 +13,7 @@ void Transmission::addPacket(int code, int data)
 
 void Transmission::addReceivedPacket(int pos, int code, int data)
 {
-    _transmission[_currentNumPackets].setCode(pos);
+    _transmission[_currentNumPackets].setPosition(pos);
     _transmission[_currentNumPackets].setCode(code);
     _transmission[_currentNumPackets].setData(data);
     _currentNumPackets++;
@@ -25,13 +25,62 @@ uint16_t Transmission::getCRCValue(){
 
 
 uint8_t Transmission::convertArrayToByte(bool * data){
-    uint8_t returnValue = 0;
-    for(int i = 0; i < 8; i++){
-        returnValue = returnValue + (2^(i))*data[i];
+    uint8_t ret = 0;
+    int length = 8;
+    int tmp;
+    for (int i = 0; i < length; i++) {
+        tmp = data[i];
+        ret |= tmp << (length - i - 1);
     }
-    return returnValue;
+    return ret;
 }
 
+bool Transmission::checkCRC(){
+    uint8_t crcByte0 = 65;
+    uint8_t crcByte1 = 0;
+    uint8_t currentByteArray[4];
+    int currentByteInData;
+    uint8_t totalDataInByteArray[40];    
+    uint8_t addressPacketByteArray[4];
+    uint8_t crcPacketByteArray[4];
+    uint16_t totalSize = _currentNumPackets*4 + 6;
+    int calcedCRCValue;
+    
+    
+    // Get address byte array
+    addressPacket.packetToByteArray(addressPacketByteArray);
+    
+    // add address packet to total byte array
+    for(int i = 0; i < 4; i++){
+        totalDataInByteArray[i] = addressPacketByteArray[i];
+    }
+    
+    
+    // Get crc byte array
+    crcPacket.packetToByteArray(crcPacketByteArray);
+    // add crc packet to total byte array
+    for(int i = 0; i < 2; i++){ // only to 2 because we dont want to include the 16 bits that will holds crc value
+        totalDataInByteArray[i+4] = crcPacketByteArray[i]; // + 4 to offset the address packet bytes
+    }
+    
+    
+    // Calc CRC on all the tranmission data packets
+    for(int i = 0; i < _currentNumPackets; i++){
+        currentByteInData = 6 + i*4;
+        _transmission[i].packetToByteArray(currentByteArray);
+        for(int j = 0; j < 4; j++){
+            totalDataInByteArray[currentByteInData+j] = currentByteArray[j];
+        }
+    }
+    calcedCRCValue = gen_crc16(totalDataInByteArray, totalSize);
+    if(crcValue == calcedCRCValue){
+        return 1;
+    }
+    else {
+        return 0;
+    }
+    
+}
 
 void Transmission::getCRC(){
     uint8_t crcByte0 = 65;
@@ -50,7 +99,6 @@ void Transmission::getCRC(){
     
     // Get address byte array
     addressPacket.packetToByteArray(addressPacketByteArray);
-
     // add address packet to total byte array
     for(int i = 0; i < 4; i++){
         totalDataInByteArray[i] = addressPacketByteArray[i];
@@ -60,10 +108,9 @@ void Transmission::getCRC(){
     crcPacket.setPosition(1); // position always in middle so = 1
     crcPacket.setCode(1); // code for CRC = 1
     crcPacket.setData(0); // data set to 0 temp
-    
+
     // Get crc byte array
     crcPacket.packetToByteArray(crcPacketByteArray);
-    
     // add crc packet to total byte array
     for(int i = 0; i < 2; i++){ // only to 2 because we dont want to include the 16 bits that will holds crc value
         totalDataInByteArray[i+4] = crcPacketByteArray[i]; // + 4 to offset the address packet bytes
@@ -78,7 +125,6 @@ void Transmission::getCRC(){
             totalDataInByteArray[currentByteInData+j] = currentByteArray[j];
         }
     }
-
     crcValue = gen_crc16(totalDataInByteArray, totalSize);
 
     // Change crc data value to new calced crc
@@ -173,7 +219,7 @@ bool Transmission::receiveTransmission(float bitRate, int pin){
         timeSinceLastChange = newTime - currentTime;
         if(digitalRead(pin) != currentState){
             // Only 1 bit
-            if(timeSinceLastChange <= 1.95*calcDelay && timeSinceLastChange > .9*calcDelay){
+            if(timeSinceLastChange <= 1.7*calcDelay && timeSinceLastChange > .9*calcDelay){
                 receiveBuffer[currentBit] = currentState;
                 currentBit++;
             }
@@ -182,14 +228,14 @@ bool Transmission::receiveTransmission(float bitRate, int pin){
                 continue;
             }       
             // 2 Bits
-            else if(timeSinceLastChange > 1.95*calcDelay && timeSinceLastChange <= calcDelay*2.8 ){
+            else if(timeSinceLastChange > 1.7*calcDelay && timeSinceLastChange <= calcDelay*2.5 ){
                 receiveBuffer[currentBit] = currentState;
                 currentBit++;
                 receiveBuffer[currentBit] = currentState;
                 currentBit++;
             }
             // 3 bits too long
-            else if(timeSinceLastChange > calcDelay*2.8){
+            else if(timeSinceLastChange > calcDelay*2.5){
                 // Probably done
                 receiveBuffer[currentBit] = currentState;
                 currentBit++;
@@ -377,10 +423,11 @@ void Transmission::deconstructTransmission(){
     codeInt = bitArrayToInt(codeBits, codeSize);
     dataInt = bitArrayToInt(dataBits, dataSize);
     
-    
+   
     addressPacket.setPosition(posInt);
     addressPacket.setCode(codeInt);
     addressPacket.setData(dataInt);
+
     
     packetOffset = packetOffset + packetSize;
     
@@ -407,6 +454,7 @@ void Transmission::deconstructTransmission(){
     crcPacket.setPosition(posInt);
     crcPacket.setCode(codeInt);
     crcPacket.setData(dataInt);
+    crcValue = dataInt;
     
     packetOffset = packetOffset + packetSize;
     
@@ -462,6 +510,7 @@ void Transmission::cleanTransmission(){
     
     totalReceivedBits = 0;
     totalDecodedBits = 0;
+    crcValue = 0;
 }    
     
 void Transmission::printEncoded(){
