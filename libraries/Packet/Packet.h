@@ -11,6 +11,7 @@
 #define SPEED_CODE 2
 #define CRC_CODE 1
 #define ADDR_CODE 0
+#define RPM_CODE 3
 
 
 

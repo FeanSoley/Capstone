@@ -267,7 +267,15 @@ void Packet::printPacket(){
             delay(10);
             Serial.print("\n"); 
             delay(10);
-            break;           
+            break;     
+        case RPM_CODE:
+            Serial.print("RPM: "); 
+            delay(10);
+            Serial.print(data); 
+            delay(10);
+            Serial.print("\n"); 
+            delay(10);
+            break; 
         default:
             Serial.print("Unknown Code: "); 
             delay(10);
