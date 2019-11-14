@@ -39,6 +39,7 @@ void loop() {
     transmission.sendPackets(BIT_RATE, PORT_NUM);
     digitalWrite(PORT_NUM, HIGH);
     delayMicroseconds(1/BIT_RATE*1000000*3);
-    analogWrite(PORT_NUM, 128);  
+    analogWrite(PORT_NUM, 128); 
+    transmission.cleanTransmission();
     delay(TIME_BETWEEN); 
 }

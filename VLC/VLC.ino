@@ -24,13 +24,14 @@ void setup() {
 }
 
 void loop() {
-    int intMPH;
+    int intMPH, rpm;
     double mph;
     
     // Code for reading obd2
     Serial1.flush();
-    mph = getSpeed() * 0.621371;
-    intMPH = (int) intMPH;
+    //mph = getSpeed() * 0.621371;
+    //intMPH = (int) mph;
+    rpm = getRPM();
 
     digitalWrite(PORT_NUM, HIGH);
     delayMicroseconds(1/BIT_RATE*1000000*3);
@@ -38,7 +39,7 @@ void loop() {
     // Set address
     transmission.setAddress(1350);
     // addPacket(CODE, DATA)
-    transmission.addPacket(SPEED_CODE, intMPH);
+    transmission.addPacket(RPM_CODE, rpm);
     // Gets CRC value from packets
     transmission.getCRC();
     // Builds address packet and crc packet and sends all 5
@@ -46,7 +47,8 @@ void loop() {
     transmission.sendPackets(BIT_RATE, PORT_NUM);
     digitalWrite(PORT_NUM, HIGH);
     delayMicroseconds(1/BIT_RATE*1000000*3);
-    analogWrite(PORT_NUM, 128);  
+    analogWrite(PORT_NUM, 128);
+    transmission.cleanTransmission();    
     delay(TIME_BETWEEN); 
 }
 
@@ -54,15 +56,17 @@ void loop() {
  void ODB_init(void)
  {
    //Wait for a little while before sending the reset command to the OBD-II-UART
-   delay(2);
+   delay(1500);
    //Reset the OBD-II-UART
+   Serial.print("Resetting OBD-II_UART\n");
    Serial1.print("ATZ\r");
    //Wait for a bit before starting to send commands after the reset.
-   delay(2);
-   OBD_read();
-   Serial1.print("ATE0\r");
-   OBD_read();
-   Serial1.flush();
+   Serial.print("Waiting for a bit before sending commands\n");
+   delay(1500);
+   //OBD_read();
+   //Serial1.print("ATE0\r");
+   //OBD_read();
+   //Serial1.flush();
  }
 
  int getRPM(void)
