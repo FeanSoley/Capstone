@@ -2,8 +2,8 @@
 #include <Packet.h>
 #include <Transmission.h>
 
-#define BIT_RATE 4800.0
-#define PORT_NUM 5
+#define BIT_RATE 2400.0
+#define PORT_NUM 3
 #define TIME_BETWEEN 1000.0
 
 void setup() { 
@@ -39,7 +39,6 @@ void loop() {
     transmission.sendPackets(BIT_RATE, PORT_NUM);
     digitalWrite(PORT_NUM, HIGH);
     delayMicroseconds(1/BIT_RATE*1000000*3);
-    analogWrite(PORT_NUM, 128); 
-    transmission.cleanTransmission();
+    analogWrite(PORT_NUM, 128);  
     delay(TIME_BETWEEN); 
 }

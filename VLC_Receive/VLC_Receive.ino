@@ -1,7 +1,7 @@
 #include <Packet.h>
 #include <Transmission.h>
 
-#define BIT_RATE 4800.0
+#define BIT_RATE 2400.0
 #define PORT_NUM 5
 
 void setup() {
@@ -32,10 +32,10 @@ void setup() {
           transmission.printTransmission();
         } 
         else {
-          Serial.print("CRC Error");
+          transmission.printTransmission();
+          //Serial.print("CRC Error");  
         }
         transmission.cleanTransmission();
-        crcCheck = transmission.checkCRC();
         
         Serial.println();
         delay(5);
